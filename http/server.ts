@@ -8,7 +8,6 @@ type callbackFn = (req: HttpRequest) => Buffer;
 
 export class HttpServer {
     server: net.Server;
-    socket: net.Socket;
     handlers: {
         [method: string]:{
             [path: string]: { regex: RegExp, fn: callbackFn };
@@ -16,19 +15,18 @@ export class HttpServer {
     } = {};
 
     constructor() {
-        this.server = net.createServer((s) => {
-            this.socket = s;
-            this.socket.setEncoding('utf-8');
-            this.socket.on('data', (data) => {
+        this.server = net.createServer((socket) => {
+            socket.setEncoding('utf-8');
+            socket.on('data', (data) => {
                 const req = parseRequest(data.toString());
                 const handler = Object.values(this.handlers[req.method]).find(
                     (handler) => req.path.match(handler.regex)
                 );
                 if (handler) {
                     const res = handler.fn(req);
-                    this.socket.write(res);
+                    socket.write(res);
                 } else {
-                    this.socket.write(NOT_FOUND_RESPONSE);
+                    socket.write(NOT_FOUND_RESPONSE);
                 }
             });
         });
