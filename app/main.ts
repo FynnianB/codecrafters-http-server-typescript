@@ -4,6 +4,7 @@ const server: net.Server = net.createServer();
 
 server.on('connection', (socket: net.Socket) => {
     socket.write('HTTP/1.1 200 OK\r\n\r\n');
+    socket.end();
 });
 
 // Uncomment this to pass the first stage
