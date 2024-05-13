@@ -30,7 +30,6 @@ export class HttpServer {
                 } else {
                     this.socket.write(NOT_FOUND_RESPONSE);
                 }
-                this.socket.end();
             });
         });
     }
