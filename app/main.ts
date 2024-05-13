@@ -1,5 +1,5 @@
 import * as net from 'net';
-import fs from "fs";
+import { readFileSync } from "fs";
 import { argv } from "node:process";
 import { buildHttpResponse } from './http-builder';
 import { HttpRequest, parseRequest } from './parser';
@@ -32,7 +32,7 @@ const handleRequest = (socket: net.Socket, req: HttpRequest) => {
             const fileName = req.path.split('/files/')[1];
             const fullPath = dir + '/' + fileName;
             try {
-                const file = fs.readFileSync(fullPath, 'utf-8');
+                const file = readFileSync(fullPath, 'utf-8');
 
                 if (file) {
                     socket.write(buildHttpResponse({
