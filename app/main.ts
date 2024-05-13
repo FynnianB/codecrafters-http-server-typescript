@@ -19,7 +19,7 @@ const handleRequest = (socket: net.Socket, req: HttpRequest) => {
                 const compressedContent =  gzipSync(routeSegments[2]);
                 socket.write(buildHttpResponse({
                     statusCode: 200,
-                    content: compressedContent.toString(),
+                    content: compressedContent.toString('base64'),
                     contentType: 'text/plain',
                     additionalHeaders: {
                         'Content-Encoding': 'gzip',
