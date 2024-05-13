@@ -13,11 +13,23 @@ const handleRequest = (socket: net.Socket, req: HttpRequest) => {
             socket.write('HTTP/1.1 200 OK\r\n\r\n');
             break;
         case '/echo':
-            socket.write(buildHttpResponse({
-                statusCode: 200,
-                content: routeSegments[2] || 'No content',
-                contentType: 'text/plain',
-            }));
+            const encoding = req.headers['Accept-Encoding'];
+            if (encoding && encoding === 'gzip') {
+                socket.write(buildHttpResponse({
+                    statusCode: 200,
+                    content: routeSegments[2] || 'No content',
+                    contentType: 'text/plain',
+                    additionalHeaders: {
+                        'Content-Encoding': 'gzip',
+                    },
+                }));
+            } else {
+                socket.write(buildHttpResponse({
+                    statusCode: 200,
+                    content: routeSegments[2] || 'No content',
+                    contentType: 'text/plain',
+                }));
+            }
             break;
         case '/user-agent':
             const userAgent = req.headers['User-Agent'] || 'No User-Agent';
