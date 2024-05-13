@@ -1,6 +1,28 @@
 import * as net from 'net';
+import { buildHttpResponse } from './http-builder';
 
 const server: net.Server = net.createServer();
+
+const handleRequest = (socket: net.Socket, path: string) => {
+    const routeSegments = path.split('/');
+    switch ('/' + routeSegments[1]) {
+        case '/':
+            socket.write('HTTP/1.1 200 OK\r\n\r\n');
+            break;
+        case '/echo':
+            const res = buildHttpResponse({
+                statusCode: 200,
+                content: routeSegments[2] || 'No content',
+                contentType: 'text/plain',
+            });
+            socket.write(res);
+            break;
+        default:
+            socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
+            break;
+    }
+    socket.end();
+}
 
 server.on('connection', (socket: net.Socket) => {
     socket.on('data', (data: Buffer) => {
@@ -8,13 +30,7 @@ server.on('connection', (socket: net.Socket) => {
         const [startLine] = content.split('\r\n');
         const [_method, path, _httpVersion] = startLine.split(' ');
 
-        if (path === '/') {
-            socket.write('HTTP/1.1 200 OK\r\n\r\n');
-        } else {
-            socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
-        }
-
-        socket.end();
+        handleRequest(socket, path);
     });
 });
 
