@@ -10,5 +10,6 @@ export const buildHttpResponse = (payload: HttpResponsePayload) => {
     const contentLength = (new TextEncoder().encode(payload.content)).length;
     return `HTTP/1.1 ${payload.statusCode} ${STATUS_CODES[payload.statusCode]}\r\n`
         + `Content-Type: ${payload.contentType}\r\nContent-Length: ${contentLength}\r\n`
+        + '\r\n'
         + `${payload.content}`;
 }
