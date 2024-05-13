@@ -1,5 +1,6 @@
 import * as net from 'net';
 import { readFileSync, writeFileSync } from "fs";
+import { gzipSync } from "zlib";
 import { argv } from "node:process";
 import { buildHttpResponse } from './http-builder';
 import { HttpRequest, parseRequest } from './parser';
@@ -15,9 +16,10 @@ const handleRequest = (socket: net.Socket, req: HttpRequest) => {
         case '/echo':
             const encoding = req.headers['Accept-Encoding'];
             if (encoding && encoding.includes('gzip')) {
+                const compressedContent =  gzipSync(routeSegments[2]);
                 socket.write(buildHttpResponse({
                     statusCode: 200,
-                    content: routeSegments[2] || 'No content',
+                    content: compressedContent.toString(),
                     contentType: 'text/plain',
                     additionalHeaders: {
                         'Content-Encoding': 'gzip',
