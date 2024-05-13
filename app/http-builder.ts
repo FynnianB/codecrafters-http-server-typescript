@@ -16,7 +16,7 @@ export const buildHttpResponse = (payload: HttpResponsePayload) => {
     }
     const headersArray = Object.entries(headers).map(([key, value]) => `${key}: ${value}`);
     return `HTTP/1.1 ${payload.statusCode} ${STATUS_CODES[payload.statusCode]}\r\n`
-        + `${headersArray.join()}\r\n`
+        + `${headersArray.join('\r\n')}\r\n`
         + '\r\n'
         + `${payload.content}`;
 }

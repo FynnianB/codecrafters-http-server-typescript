@@ -14,7 +14,6 @@ const handleRequest = (socket: net.Socket, req: HttpRequest) => {
             break;
         case '/echo':
             const encoding = req.headers['Accept-Encoding'];
-            console.log(encoding);
             if (encoding && encoding === 'gzip') {
                 socket.write(buildHttpResponse({
                     statusCode: 200,
