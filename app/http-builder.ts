@@ -9,7 +9,7 @@ export const buildHttpResponse = (
     const startLineBuffer = Buffer.from(`HTTP/1.1 ${statusCode} ${STATUS_CODES[statusCode]}\r\n`);
 
     if (!content && !contentType) {
-        return startLineBuffer;
+        return Buffer.concat([startLineBuffer, Buffer.from('\r\n')]);
     }
 
     const contentBuffer = content instanceof Buffer
