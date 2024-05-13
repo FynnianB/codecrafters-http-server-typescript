@@ -1,11 +1,10 @@
 import * as net from 'net';
 
-const server = net.createServer((socket) => {
-    socket.end();
-});
+const server: net.Server = net.createServer();
 
-// You can use print statements as follows for debugging, they'll be visible when running tests.
-console.log("Logs from your program will appear here!");
+server.on('connection', (socket: net.Socket) => {
+    socket.write('HTTP/1.1 200 OK\r\n\r\n');
+});
 
 // Uncomment this to pass the first stage
 server.listen(4221, 'localhost', () => {
