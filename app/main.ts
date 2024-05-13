@@ -17,9 +17,10 @@ const handleRequest = (socket: net.Socket, req: HttpRequest) => {
             const encoding = req.headers['Accept-Encoding'];
             if (encoding && encoding.includes('gzip')) {
                 const compressedContent =  gzipSync(routeSegments[2]);
+                // socket.write(compressedContent);
                 socket.write(buildHttpResponse({
                     statusCode: 200,
-                    content: compressedContent.toString('base64'),
+                    content: compressedContent.toString('hex'),
                     contentType: 'text/plain',
                     additionalHeaders: {
                         'Content-Encoding': 'gzip',
