@@ -16,15 +16,25 @@ const handleRequest = (socket: net.Socket, req: HttpRequest) => {
         case '/echo':
             const encoding = req.headers['Accept-Encoding'];
             if (encoding && encoding.includes('gzip')) {
-                const compressedContent =  gzipSync(routeSegments[2]);
-                socket.write(buildHttpResponse({
-                    statusCode: 200,
-                    content: compressedContent.toString('hex'),
-                    contentType: 'text/plain',
-                    additionalHeaders: {
-                        'Content-Encoding': 'gzip',
-                    },
-                }));
+                const compressed =  gzipSync(routeSegments[2]);
+                const resHeaders = [
+                    `Content-Encoding: gzip`,
+                    'Content-Type: text/plain',
+                    `Content-Length: ${compressed.toString().length}`
+                ].join('\r\n');
+                const payload = Buffer.concat([
+                    Buffer.from(`HTTP/1.1 200 OK\r\n${resHeaders}\r\n\r\n`, 'utf-8'),
+                    compressed
+                ]);
+                socket.write(payload);
+                // socket.write(buildHttpResponse({
+                //     statusCode: 200,
+                //     content: compressedContent.toString(),
+                //     contentType: 'text/plain',
+                //     additionalHeaders: {
+                //         'Content-Encoding': 'gzip',
+                //     },
+                // }));
             } else {
                 socket.write(buildHttpResponse({
                     statusCode: 200,
