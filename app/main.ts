@@ -1,5 +1,5 @@
 import * as net from 'net';
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import { argv } from "node:process";
 import { buildHttpResponse } from './http-builder';
 import { HttpRequest, parseRequest } from './parser';
@@ -32,16 +32,21 @@ const handleRequest = (socket: net.Socket, req: HttpRequest) => {
             const fileName = req.path.split('/files/')[1];
             const fullPath = dir + '/' + fileName;
             try {
-                const file = readFileSync(fullPath, 'utf-8');
+                if (req.method === 'GET') {
+                    const file = readFileSync(fullPath, 'utf-8');
 
-                if (file) {
-                    socket.write(buildHttpResponse({
-                        statusCode: 200,
-                        content: file,
-                        contentType: 'application/octet-stream',
-                    }));
-                } else {
-                    socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
+                    if (file) {
+                        socket.write(buildHttpResponse({
+                            statusCode: 200,
+                            content: file,
+                            contentType: 'application/octet-stream',
+                        }));
+                    } else {
+                        socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
+                    }
+                } else if (req.method === 'POST') {
+                    writeFileSync(fullPath, req.content);
+                    socket.write('HTTP/1.1 201 Created\r\n\r\n');
                 }
             } catch (e) {
                 socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
