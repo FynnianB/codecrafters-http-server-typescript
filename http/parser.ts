@@ -1,10 +1,4 @@
-export interface HttpRequest {
-    method: string;
-    path: string;
-    httpVersion: string;
-    headers: Record<string, string>;
-    content: string;
-}
+import { HttpRequest, Method } from './http.types';
 
 export const parseRequest = (req: string): HttpRequest => {
     const startLine = req.split('\r\n')[0];
@@ -14,7 +8,7 @@ export const parseRequest = (req: string): HttpRequest => {
     const [method, path, httpVersion] = startLine.split(' ');
 
     return {
-        method: method,
+        method: Method[method],
         path,
         httpVersion: httpVersion,
         headers: headers.split('\r\n').reduce((acc, header) => {

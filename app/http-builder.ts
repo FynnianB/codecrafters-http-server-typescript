@@ -1,29 +1,30 @@
 import { STATUS_CODES } from 'http';
 
-interface HttpResponsePayload {
-    statusCode: number;
-    content: string|Buffer;
-    contentType: string;
-    additionalHeaders?: Record<string, string>;
-}
+export const buildHttpResponse = (
+    statusCode: number,
+    content?: string | Buffer,
+    contentType?: string,
+    additionalHeaders?: Record<string, string|number>,
+): Buffer => {
+    const startLineBuffer = Buffer.from(`HTTP/1.1 ${statusCode} ${STATUS_CODES[statusCode]}\r\n`);
 
-export const buildHttpResponse = (payload: HttpResponsePayload): Buffer => {
-    const body = payload.content instanceof Buffer
-        ? payload.content
-        : Buffer.from(payload.content, 'utf-8');
-    const contentLength = body.toString().length;
+    if (!content && !contentType) {
+        return startLineBuffer;
+    }
+
+    const contentBuffer = content instanceof Buffer
+        ? content
+        : Buffer.from(content, 'utf-8');
+
     const headers = {
-        'Content-Type': payload.contentType,
-        'Content-Length': contentLength.toString(),
-        ...payload.additionalHeaders,
+        'Content-Type': contentType,
+        'Content-Length': contentBuffer.toString().length,
+        ...additionalHeaders,
     }
     const headersArray = Object.entries(headers).map(([key, value]) => `${key}: ${value}`);
-    return Buffer.concat([
-        Buffer.from(
-            `HTTP/1.1 ${payload.statusCode} ${STATUS_CODES[payload.statusCode]}\r\n`
-            + `${headersArray.join('\r\n')}\r\n`
-            + '\r\n'
-        ),
-        body
-    ]);
-}
+    const headersBuffer = Buffer.from(headersArray.reduce(
+        (acc, header) => `${acc}${header}\r\n`, ''
+    ));
+
+    return Buffer.concat([startLineBuffer, headersBuffer, Buffer.from('\r\n'), contentBuffer]);
+};
